@@ -9,8 +9,20 @@ public enum AIDifficulty
     Hard,
     Insane
 }
+
+public enum PowerUpType
+{
+    Smash,
+    Freeze,
+    Reduce
+}
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
+    public PlayerPowerUpManager leftPlayer;
+    public PlayerPowerUpManager rightPlayer;
+
     public Ball ball;
     public GameObject startPanel;
     public AIEnemy enemy;
@@ -24,11 +36,24 @@ public class GameManager : MonoBehaviour
 
     Coroutine serveRoutine;
 
+    public PowerUpSpawner powerUpSpawner;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+        Instance = this;
+    }
+    public PlayerPowerUpManager GetPlayerManager(int playerId)
+    {
+        return playerId == 0 ? leftPlayer : rightPlayer;
+    }
+
     void Start()
     {
-        //UpdateUI();
-        //serveRoutine = StartCoroutine(Serve(0));
-
         Time.timeScale = 0f;
         startPanel.SetActive(true);
     }
@@ -42,6 +67,7 @@ public class GameManager : MonoBehaviour
         startPanel.SetActive(false);
         Time.timeScale = 1f;
 
+        powerUpSpawner.Begin();
         StartCoroutine(Serve(0));
     }
 
@@ -55,8 +81,6 @@ public class GameManager : MonoBehaviour
             if (serveRoutine != null) StopCoroutine(serveRoutine);
             serveRoutine = StartCoroutine(Serve(1));
         }
-
-
     }
 
     public void RightScores()
@@ -86,7 +110,8 @@ public class GameManager : MonoBehaviour
                 winnerText.text = (leftScore > rightScore) ? "Left Wins!" : "Right Wins!";
             winnerText.gameObject.SetActive(true);
 
-            Time.timeScale = 0f; // Stop the game
+            powerUpSpawner.StopSpwanning();
+            Time.timeScale = 0f;
             return true;
         }
         return false;

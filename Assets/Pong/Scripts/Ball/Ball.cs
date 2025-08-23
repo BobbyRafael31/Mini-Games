@@ -15,6 +15,10 @@ public class Ball : MonoBehaviour
 
     private const float MIN_X_DIR = 0.3f;
 
+    public int lastHitPlayerId = -1; // -1 = none, 0 = left, 1 = right
+
+    private bool smashMode = false;
+
     void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -51,6 +55,11 @@ public class Ball : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.collider.name.Contains("Left"))
+            lastHitPlayerId = 0;
+        else if (collision.collider.name.Contains("Right"))
+            lastHitPlayerId = 1;
+
         if (collision.collider.CompareTag("Player"))
             HandlePlayerBounce(collision);
     }
@@ -65,6 +74,8 @@ public class Ball : MonoBehaviour
 
         float xDir = Mathf.Sign(collision.GetContact(0).normal.x) * -1f;
 
+        float speedBoost = 1f + Mathf.Abs(normalizedOffset) * 0.05f;
+
         Vector2 direction = new Vector2
             (Mathf.Cos(angleRad) * xDir, Mathf.Sin(angleRad)).normalized;
 
@@ -75,6 +86,7 @@ public class Ball : MonoBehaviour
         }
 
         float playerX = collision.collider.transform.position.x;
+
         if (transform.position.x > playerX && direction.x < 0)
         {
             direction.x = Mathf.Abs(direction.x);
@@ -85,9 +97,13 @@ public class Ball : MonoBehaviour
         }
         direction.Normalize();
 
-        float speedBoost = 1f + Mathf.Abs(normalizedOffset) * 0.05f;
-        currentSpeed = Mathf.Min(currentSpeed * speedBoost, maxSpeed);
+        if (smashMode)
+        {
+            speedBoost = 1.8f; // big smash boost
+            smashMode = false; // reset after one use
+        }
 
+        currentSpeed = Mathf.Min(currentSpeed * speedBoost, maxSpeed);
         _rb.linearVelocity = direction * currentSpeed;
 
         Vector2 paddleEdge = collision.collider.ClosestPoint(transform.position);
@@ -107,5 +123,10 @@ public class Ball : MonoBehaviour
     {
         _ballCollider.enabled = true;
         _ballSprite.enabled = true;
+    }
+
+    public void SetSmashMode()
+    {
+        smashMode = true;
     }
 }

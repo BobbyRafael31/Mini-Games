@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     public KeyCode downKey = KeyCode.S;
 
     float limit;
+    private bool frozen = false;
 
     private void Start()
     {
@@ -20,6 +21,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+
+        if (frozen) return;
+
         float direction = 0f;
 
         if (Input.GetKey(upKey)) direction += 1f;
@@ -33,5 +37,32 @@ public class PlayerMovement : MonoBehaviour
         transform.position = position;
     }
 
+    public void Freeze(float duration)
+    {
+        if (!gameObject.activeInHierarchy) return;
+        StartCoroutine(FreezeCoroutine(duration));
+    }
+
+    private System.Collections.IEnumerator FreezeCoroutine(float duration)
+    {
+        frozen = true;
+        yield return new WaitForSeconds(duration);
+        frozen = false;
+    }
+
+    public void Reduce(float duration)
+    {
+        StartCoroutine(ReduceRoutine(duration));
+    }
+
+    private System.Collections.IEnumerator ReduceRoutine(float duration)
+    {
+        Vector3 originalScale = transform.localScale;
+        transform.localScale = new Vector3(originalScale.x, originalScale.y * 0.5f, originalScale.z);
+
+        yield return new WaitForSeconds(duration);
+
+        transform.localScale = originalScale;
+    }
 
 }
