@@ -3966,6 +3966,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftPlayer: {fileID: 507587081}
   rightPlayer: {fileID: 1639228253}
+  leftPaddle: {fileID: 507587075}
+  rightPaddle: {fileID: 1639228245}
   ball: {fileID: 2108834881}
   startPanel: {fileID: 59009719}
   enemy: {fileID: 1639228251}
@@ -4833,7 +4835,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ballSpeed: 12
   maxBounceAngle: 60
-  maxSpeed: 14
+  maxSpeed: 16
   accelerationRate: 0.5
   lastHitPlayerId: -1
 --- !u!1 &2141262059
@@ -4978,8 +4980,8 @@ SceneRoots:
   - {fileID: 1543076403}
   - {fileID: 1343493176}
   - {fileID: 1502743998}
+  - {fileID: 2018361278}
   - {fileID: 2108834878}
   - {fileID: 889364306}
   - {fileID: 460568428}
   - {fileID: 2043782664}
-  - {fileID: 2018361278}

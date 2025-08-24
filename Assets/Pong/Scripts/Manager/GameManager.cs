@@ -23,6 +23,9 @@ public class GameManager : MonoBehaviour
     public PlayerPowerUpManager leftPlayer;
     public PlayerPowerUpManager rightPlayer;
 
+    public GameObject leftPaddle;
+    public GameObject rightPaddle;
+
     public Ball ball;
     public GameObject startPanel;
     public AIEnemy enemy;
@@ -133,6 +136,10 @@ public class GameManager : MonoBehaviour
 
         serveRoutine = null;
 
+    }
+    public GameObject GetOpponentPaddle(int playerId)
+    {
+        return playerId == 0 ? rightPaddle : leftPaddle;
     }
 
 }

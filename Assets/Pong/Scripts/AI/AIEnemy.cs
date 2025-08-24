@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class AIEnemy : MonoBehaviour
 {
@@ -13,8 +14,19 @@ public class AIEnemy : MonoBehaviour
 
     private AIDifficulty currentDifficulty;
 
+    private bool isFrozen = false;
+    private float freezeTimer = 0f;
+
     void Update()
     {
+        if (isFrozen)
+        {
+            freezeTimer -= Time.deltaTime;
+            if (freezeTimer <= 0f)
+                isFrozen = false;
+            return;
+        }
+
         if (ball == null) return;
 
         timer -= Time.deltaTime;
@@ -112,5 +124,24 @@ public class AIEnemy : MonoBehaviour
         }
 
         return simulatedPos.y;
+    }
+
+    public void Freeze(float duration)
+    {
+        isFrozen = true;
+        freezeTimer = duration;
+    }
+
+    public void Reduce(float duration)
+    {
+        StartCoroutine(ReduceSizeTemporarily(duration));
+    }
+
+    private IEnumerator ReduceSizeTemporarily(float duration)
+    {
+        Vector3 originalScale = transform.localScale;
+        transform.localScale = new Vector3(originalScale.x, originalScale.y * 0.5f, originalScale.z);
+        yield return new WaitForSeconds(duration);
+        transform.localScale = originalScale;
     }
 }

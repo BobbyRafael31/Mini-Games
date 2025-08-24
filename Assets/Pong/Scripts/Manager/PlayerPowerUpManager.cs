@@ -37,16 +37,51 @@ public class PlayerPowerUpManager : MonoBehaviour
         if (queue.Count == 0) return;
 
         PowerUp.PowerUpType type = queue.Dequeue();
+
+        string opponentName = opponent.name;
+        string source = playerId == 0 ? "Left Paddle" : "Right Paddle";
+
         switch (type)
         {
             case PowerUp.PowerUpType.Smash:
-                ball.SetSmashMode();
+                ball.QueueSmash();
+                Debug.Log($"{source} activated SMASH — ball speed boosted.");
                 break;
+
             case PowerUp.PowerUpType.Freeze:
-                opponent.GetComponent<PlayerMovement>().Freeze(1f);
+                var playerFreeze = opponent.GetComponent<PlayerMovement>();
+                if (playerFreeze != null)
+                {
+                    playerFreeze.Freeze(1f);
+                    Debug.Log($"{source} applied FREEZE to {opponentName}.");
+                }
+                else
+                {
+                    var aiFreeze = opponent.GetComponent<AIEnemy>();
+                    if (aiFreeze != null)
+                    {
+                        aiFreeze.Freeze(1f);
+                        Debug.Log($"{source} applied FREEZE to AI ({opponentName}).");
+                    }
+                }
                 break;
+
             case PowerUp.PowerUpType.Reduce:
-                opponent.GetComponent<PlayerMovement>().Reduce(2f);
+                var playerReduce = opponent.GetComponent<PlayerMovement>();
+                if (playerReduce != null)
+                {
+                    playerReduce.Reduce(2f);
+                    Debug.Log($"{source} applied REDUCE to {opponentName}.");
+                }
+                else
+                {
+                    var aiReduce = opponent.GetComponent<AIEnemy>();
+                    if (aiReduce != null)
+                    {
+                        aiReduce.Reduce(2f);
+                        Debug.Log($"{source} applied REDUCE to AI ({opponentName}).");
+                    }
+                }
                 break;
         }
 
