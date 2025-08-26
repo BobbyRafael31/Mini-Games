@@ -147,5 +147,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1911e0e01a57824b8990cd313c10b01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
+  data: {fileID: 11400000, guid: 38a437309338c0e459c55e279c2fcca8, type: 2}
   spawner: {fileID: 0}

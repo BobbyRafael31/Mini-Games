@@ -4,93 +4,49 @@ using UnityEngine.UI;
 
 public class PlayerPowerUpManager : MonoBehaviour
 {
-    public int playerId; // left player = 0, right player = 1
-    public Image[] powerUpSlots; // 3 for each player
-    public Sprite smashSprite, freezeSprite, reduceSprite;
+    [Header("Player Info")]
+    public int playerId;
 
-    private Queue<PowerUp.PowerUpType> queue = new Queue<PowerUp.PowerUpType>();
+    [Header("PowerUp Sprites Slots")]
+    public Image[] powerUpSlots;
 
-    private Sprite defaultSprite;
+    [Header("Default Sprites")]
+    public Sprite defaultSprite;
+
+    private Queue<IPowerUpEffect> powerUpQueue = new Queue<IPowerUpEffect>();
+    private Queue<Sprite> iconQueue = new Queue<Sprite>();
+
     void Start()
     {
-        if (powerUpSlots.Length > 0)
+        if (powerUpSlots.Length > 0 && defaultSprite == null)
             defaultSprite = powerUpSlots[0].sprite;
     }
 
-    public void AddPowerUp(PowerUp.PowerUpType type)
+    public void AddPowerUp(IPowerUpEffect effect, Sprite icon)
     {
-        if (queue.Count >= powerUpSlots.Length) return;
+        if (powerUpQueue.Count >= powerUpSlots.Length) return;
 
-        queue.Enqueue(type);
+        powerUpQueue.Enqueue(effect);
+        iconQueue.Enqueue(icon);
 
-        int index = queue.Count - 1;
-        switch (type)
-        {
-            case PowerUp.PowerUpType.Smash: powerUpSlots[index].sprite = smashSprite; break;
-            case PowerUp.PowerUpType.Freeze: powerUpSlots[index].sprite = freezeSprite; break;
-            case PowerUp.PowerUpType.Reduce: powerUpSlots[index].sprite = reduceSprite; break;
-        }
+        int index = powerUpQueue.Count - 1;
+        powerUpSlots[index].sprite = icon;
     }
 
     public void UseNextPowerUp(Ball ball, GameObject opponent)
     {
-        if (queue.Count == 0) return;
+        if (powerUpQueue.Count == 0 || iconQueue.Count == 0) return;
 
-        PowerUp.PowerUpType type = queue.Dequeue();
+        IPowerUpEffect effect = powerUpQueue.Dequeue();
+        Sprite usedIcon = iconQueue.Dequeue();
 
-        string opponentName = opponent.name;
-        string source = playerId == 0 ? "Left Paddle" : "Right Paddle";
-
-        switch (type)
-        {
-            case PowerUp.PowerUpType.Smash:
-                ball.QueueSmash();
-                Debug.Log($"{source} activated SMASH — ball speed boosted.");
-                break;
-
-            case PowerUp.PowerUpType.Freeze:
-                var playerFreeze = opponent.GetComponent<PlayerMovement>();
-                if (playerFreeze != null)
-                {
-                    playerFreeze.Freeze(1f);
-                    Debug.Log($"{source} applied FREEZE to {opponentName}.");
-                }
-                else
-                {
-                    var aiFreeze = opponent.GetComponent<AIEnemy>();
-                    if (aiFreeze != null)
-                    {
-                        aiFreeze.Freeze(1f);
-                        Debug.Log($"{source} applied FREEZE to AI ({opponentName}).");
-                    }
-                }
-                break;
-
-            case PowerUp.PowerUpType.Reduce:
-                var playerReduce = opponent.GetComponent<PlayerMovement>();
-                if (playerReduce != null)
-                {
-                    playerReduce.Reduce(2f);
-                    Debug.Log($"{source} applied REDUCE to {opponentName}.");
-                }
-                else
-                {
-                    var aiReduce = opponent.GetComponent<AIEnemy>();
-                    if (aiReduce != null)
-                    {
-                        aiReduce.Reduce(2f);
-                        Debug.Log($"{source} applied REDUCE to AI ({opponentName}).");
-                    }
-                }
-                break;
-        }
-
-        powerUpSlots[0].sprite = defaultSprite;
+        effect.Apply(ball, opponent);
 
         for (int i = 1; i < powerUpSlots.Length; i++)
         {
             powerUpSlots[i - 1].sprite = powerUpSlots[i].sprite;
         }
-    }
 
+        powerUpSlots[powerUpSlots.Length - 1].sprite = defaultSprite;
+    }
 }

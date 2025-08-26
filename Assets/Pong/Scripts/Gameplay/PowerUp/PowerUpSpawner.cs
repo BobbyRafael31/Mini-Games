@@ -11,11 +11,12 @@ public class PowerUpSpawner : MonoBehaviour
     public float minInterval = 4f;
     public float maxInterval = 8f;
 
-    [Header("Spawn Settings")] // based on camera
+    [Header("PowerUp Spawn Settings")]
     [Range(0.1f, 1f)] public float centerStripWidthPercent = 0.35f;
     [Range(0f, 0.45f)] public float verticalMarginPercent = 0.1f;
 
-    [Header("Limits")]
+
+    [Header("PowerUp Limits")]
     public int maxActive = 3;
 
     private List<PowerUp> activePowerUps = new List<PowerUp>();
@@ -62,37 +63,35 @@ public class PowerUpSpawner : MonoBehaviour
 
     Vector3 RandomSpawnPosition()
     {
-        Camera cam = Camera.main;
-        float halfH = cam.orthographicSize;
-        float halfW = halfH * cam.aspect;
+        Bounds camBounds = CameraBoundsUtility.GetCameraBounds(Camera.main);
+        Vector3 camCenter = camBounds.center;
 
-        float stripHalfW = halfW * centerStripWidthPercent * 0.5f;
-        float x = Random.Range(-stripHalfW, stripHalfW);
+        float stripHalfWidth = camBounds.size.x * centerStripWidthPercent * 0.5f;
+        float verticalMargin = camBounds.size.y * verticalMarginPercent;
 
-        float vMargin = halfH * verticalMarginPercent;
-        float y = Random.Range(-halfH + vMargin, halfH - vMargin);
+        float x = Random.Range(camCenter.x - stripHalfWidth, camCenter.x + stripHalfWidth);
+        float y = Random.Range(camBounds.min.y + verticalMargin, camBounds.max.y - verticalMargin);
 
         return new Vector3(x, y, 0f);
     }
 
 #if UNITY_EDITOR
-
     private void OnDrawGizmosSelected()
     {
-        var cam = Camera.main;
-        if (!cam) return;
+        if (!Camera.main) return;
 
-        float halfH = cam.orthographicSize;
-        float halfW = halfH * cam.aspect;
+        Bounds camBounds = CameraBoundsUtility.GetCameraBounds(Camera.main);
+        Vector3 camCenter = camBounds.center;
 
-        float stripHalfW = halfW * centerStripWidthPercent * 0.5f;
-        float vMargin = halfH * verticalMarginPercent;
+        float stripHalfWidth = camBounds.size.x * centerStripWidthPercent * 0.5f;
+        float verticalMargin = camBounds.size.y * verticalMarginPercent;
+
+        Vector3 center = new Vector3(camCenter.x, camCenter.y, 0f);
+        Vector3 size = new Vector3(stripHalfWidth * 2f, camBounds.size.y - verticalMargin * 2f, 0f);
 
         Gizmos.color = Color.yellow;
-        Vector3 center = Vector3.zero;
-        Vector3 size = new Vector3(stripHalfW * 2f, (halfH - vMargin) * 2f, 0f);
         Gizmos.DrawWireCube(center, size);
     }
-
 #endif
+
 }

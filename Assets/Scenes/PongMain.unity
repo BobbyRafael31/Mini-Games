@@ -1452,9 +1452,7 @@ MonoBehaviour:
   - {fileID: 978833255}
   - {fileID: 2141262061}
   - {fileID: 345253093}
-  smashSprite: {fileID: -2413806693520163455, guid: d1d2377588a10514f9c8d178191fd684, type: 3}
-  freezeSprite: {fileID: 7482667652216324306, guid: 233893f33ca96054b92eef1fee3a23ee, type: 3}
-  reduceSprite: {fileID: 3625043607559282579, guid: a7776664ff0dbf04db96dd2f2dcc59b8, type: 3}
+  defaultSprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!1 &517224191
 GameObject:
   m_ObjectHideFlags: 0
@@ -3055,8 +3053,8 @@ MonoBehaviour:
   - {fileID: -6239325397387800876, guid: 62abb715789deb741a97af98fcb571be, type: 3}
   minInterval: 4
   maxInterval: 8
-  centerStripWidthPercent: 0.35
-  verticalMarginPercent: 0.1
+  centerStripWidthPercent: 0.344
+  verticalMarginPercent: 0.063
   maxActive: 3
 --- !u!4 &1386389760
 Transform:
@@ -3461,9 +3459,7 @@ MonoBehaviour:
   - {fileID: 418097947}
   - {fileID: 77457508}
   - {fileID: 15581923}
-  smashSprite: {fileID: -2413806693520163455, guid: d1d2377588a10514f9c8d178191fd684, type: 3}
-  freezeSprite: {fileID: 7482667652216324306, guid: 233893f33ca96054b92eef1fee3a23ee, type: 3}
-  reduceSprite: {fileID: 3625043607559282579, guid: a7776664ff0dbf04db96dd2f2dcc59b8, type: 3}
+  defaultSprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!1 &1797818523
 GameObject:
   m_ObjectHideFlags: 0

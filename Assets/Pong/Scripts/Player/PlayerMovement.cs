@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -43,7 +44,7 @@ public class PlayerMovement : MonoBehaviour
         StartCoroutine(FreezeCoroutine(duration));
     }
 
-    private System.Collections.IEnumerator FreezeCoroutine(float duration)
+    private IEnumerator FreezeCoroutine(float duration)
     {
         frozen = true;
         yield return new WaitForSeconds(duration);
@@ -55,7 +56,7 @@ public class PlayerMovement : MonoBehaviour
         StartCoroutine(ReduceRoutine(duration));
     }
 
-    private System.Collections.IEnumerator ReduceRoutine(float duration)
+    private IEnumerator ReduceRoutine(float duration)
     {
         Vector3 originalScale = transform.localScale;
         transform.localScale = new Vector3(originalScale.x, originalScale.y * 0.5f, originalScale.z);

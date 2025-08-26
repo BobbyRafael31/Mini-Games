@@ -2,16 +2,47 @@ using UnityEngine;
 
 public struct SmashState
 {
-    public bool IsQueued;
-    public bool IsActive;
-    public float SavedSpeed;
-    public float TempMaxSpeed;
+    public bool IsQueued { get; private set; }
+    public bool IsActive { get; private set; }
+    public float SavedSpeed { get; private set; }
+    public float TempMaxSpeed { get; private set; }
+
+    public void Queue(float currentSpeed)
+    {
+        if (!IsQueued)
+        {
+            SavedSpeed = currentSpeed;
+            IsQueued = true;
+            IsActive = false;
+        }
+    }
+
+    public void Activate()
+    {
+        TempMaxSpeed = 20f;
+        IsActive = true;
+        IsQueued = false;
+    }
+
+    public void Deactivate()
+    {
+        IsActive = false;
+        IsQueued = false;
+        TempMaxSpeed = 0f;
+        SavedSpeed = 0f;
+    }
+
+    public void Reset()
+    {
+        IsQueued = false;
+        IsActive = false;
+        TempMaxSpeed = 0f;
+        SavedSpeed = 0f;
+    }
 }
 
 public class Ball : MonoBehaviour
 {
-    #region -Variables-
-
     [Header("Ball Settings")]
     public float ballSpeed = 8f;
     public float maxBounceAngle = 60f;
@@ -19,17 +50,13 @@ public class Ball : MonoBehaviour
     public float accelerationRate = 0.5f;
     private float currentSpeed;
     public int lastHitPlayerId = -1; // -1 = none, 0 = left, 1 = right
-    private const float MIN_X_DIR = 0.3f; // Minimum horizontal direction component
 
     [Header("Components")]
     private Rigidbody2D _rb;
     private Collider2D _ballCollider;
     private SpriteRenderer _ballSprite;
-    private SmashState smash;
+    private SmashState smash = new SmashState();
 
-    #endregion
-
-    #region Unity Callbacks
     void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -62,10 +89,6 @@ public class Ball : MonoBehaviour
         if (collision.collider.CompareTag("Player"))
             HandlePlayerBounce(collision);
     }
-
-    #endregion
-
-    #region -Ball Control-
     public void LaunchBall(int direction)
     {
         float maxRad = maxBounceAngle * Mathf.Deg2Rad * 0.333f;
@@ -81,37 +104,17 @@ public class Ball : MonoBehaviour
         _rb.linearVelocity = dir * ballSpeed;
     }
 
-    private (Vector2 direction, float normalizedOffset) CalculateBounceDirection(Collision2D collision)
+    private (Vector2 direction, float normalizedOffset) CalculateBounce(Collision2D collision)
     {
-        float playerY = collision.collider.transform.position.y;
-        float hitPointY = transform.position.y;
-        float normalizedOffset = (hitPointY - playerY) / (collision.collider.bounds.size.y / 2f);
-        float angleRad = normalizedOffset * maxBounceAngle * Mathf.Deg2Rad;
+        float offset = BounceUtility.GetNormalizedOffset(collision, transform);
 
-        float xDir = Mathf.Sign(collision.GetContact(0).normal.x) * -1f;
-        Vector2 direction = new Vector2(
-            Mathf.Cos(angleRad) * xDir, Mathf.Sin(angleRad)).normalized;
+        Vector2 dir = BounceUtility.CalculateBounceDirection(collision, maxBounceAngle, transform);
 
-        if (Mathf.Abs(direction.x) < MIN_X_DIR)
-        {
-            direction.x = MIN_X_DIR * xDir;
-            direction.Normalize();
-        }
-
-        float playerX = collision.collider.transform.position.x;
-
-        if (transform.position.x > playerX && direction.x < 0)
-            direction.x = Mathf.Abs(direction.x);
-        else if (transform.position.x < playerX && direction.x > 0)
-            direction.x = -Mathf.Abs(direction.x);
-
-        return (direction.normalized, normalizedOffset);
+        return (dir, offset);
     }
-
-
     private void HandlePlayerBounce(Collision2D collision)
     {
-        var (direction, normalizedOffset) = CalculateBounceDirection(collision);
+        var (direction, normalizedOffset) = CalculateBounce(collision);
 
         if (lastHitPlayerId != -1)
         {
@@ -143,26 +146,20 @@ public class Ball : MonoBehaviour
         _ballSprite.enabled = true;
     }
 
-    #endregion
-
-    #region -Smash and Speed Boost-
     private void ApplySmashIfNeeded()
     {
         if (smash.IsQueued && !smash.IsActive)
         {
-            smash.TempMaxSpeed = 20f;
+            smash.Activate();
             currentSpeed = Mathf.Min(currentSpeed * 2.5f, smash.TempMaxSpeed);
-            smash.IsActive = true;
-            smash.IsQueued = false;
         }
         else if (smash.IsActive && lastHitPlayerId != -1)
         {
             currentSpeed = smash.SavedSpeed;
-            smash.SavedSpeed = 0f;
-            smash.IsActive = false;
-            smash.TempMaxSpeed = 0f;
+            smash.Deactivate();
         }
     }
+
     private void ApplySpeedBoost(float normalizedOffset)
     {
         if (!smash.IsActive)
@@ -174,12 +171,6 @@ public class Ball : MonoBehaviour
 
     public void QueueSmash()
     {
-        if (!smash.IsQueued)
-        {
-            smash.SavedSpeed = currentSpeed;
-            smash.IsQueued = true;
-            smash.IsActive = false;
-        }
+        smash.Queue(currentSpeed);
     }
-    #endregion
 }
